@@ -5,9 +5,9 @@
  *  @version 1.2.0
  *
  *  (C) Copyright 2020 GoPro Inc (http://gopro.com/).
- *	
+ *
  *  Licensed under either:
- *  - Apache License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0  
+ *  - Apache License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0
  *  - MIT license, http://opensource.org/licenses/MIT
  *  at your option.
  *
@@ -18,19 +18,18 @@
  *  limitations under the License.
  *
  */
- 
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 
-#include "GPMF_parser.h"
-#include "GPMF_utils.h"
-
+#include "gpmf-parser/GPMF_parser.h"
+#include "gpmf-parser/GPMF_utils.h"
 
 double GetGPMFSampleRate(mp4callbacks cb, uint32_t fourcc, uint32_t timeBaseFourCC, uint32_t flags, double *firstsampletime, double *lastsampletime)
 {
-	if (cb.mp4handle == 0) 
+	if (cb.mp4handle == 0)
 		return 0.0;
 
 	uint32_t indexcount = cb.cbGetNumberPayloads(cb.mp4handle);
@@ -96,7 +95,7 @@ double GetGPMFSampleRate(mp4callbacks cb, uint32_t fourcc, uint32_t timeBaseFour
 				GPMF_stream any_stream;
 				if (GPMF_OK == GPMF_Init(&any_stream, payload, payloadsize))
 				{
-					basetimestamp = starttimestamp;  
+					basetimestamp = starttimestamp;
 
 					if (timeBaseFourCC)
 					{
@@ -119,7 +118,7 @@ double GetGPMFSampleRate(mp4callbacks cb, uint32_t fourcc, uint32_t timeBaseFour
 					}
 				}
 			}
-			//Note: basetimestamp is used the remove offset from the timestamp, 
+			//Note: basetimestamp is used the remove offset from the timestamp,
 			// however 0.0 may not be the same zero for your video or audio presentation time (although it should be close.)
 			// On GoPro camera, metadata streams like SHUT and ISOE are metadata fields associated with video, and these can be used
 			// to accurately sync meta with video.
@@ -145,7 +144,7 @@ double GetGPMFSampleRate(mp4callbacks cb, uint32_t fourcc, uint32_t timeBaseFour
 				for (i = teststart; i <= testend; i++)
 				{
 					payloadsize = cb.cbGetPayloadSize(cb.mp4handle, i);
-					payload = cb.cbGetPayload(cb.mp4handle, payloadres, i); 
+					payload = cb.cbGetPayload(cb.mp4handle, payloadres, i);
 					if (GPMF_OK == GPMF_Init(ms, payload, payloadsize))
 						if (GPMF_OK == GPMF_FindNext(ms, fourcc, GPMF_RECURSE_LEVELS | GPMF_TOLERANT))
 							endsamples += GPMF_PayloadSampleCount(ms);
@@ -198,7 +197,7 @@ double GetGPMFSampleRate(mp4callbacks cb, uint32_t fourcc, uint32_t timeBaseFour
 
 					intercept = (double)-startin * rate;
 				}
-				else // for increased precision, for older GPMF streams sometimes missing the total sample count 
+				else // for increased precision, for older GPMF streams sometimes missing the total sample count
 				{
 					uint32_t payloadpos = 0, payloadcount = 0;
 					double slope, top = 0.0, bot = 0.0, meanX = 0, meanY = 0;
@@ -265,8 +264,8 @@ double GetGPMFSampleRate(mp4callbacks cb, uint32_t fourcc, uint32_t timeBaseFour
 						}
 					}
 
-					// Compute the line of best fit for a jitter removed sample rate.  
-					// This does assume an unchanging clock, even though the IMU data can thermally impacted causing small clock changes.  
+					// Compute the line of best fit for a jitter removed sample rate.
+					// This does assume an unchanging clock, even though the IMU data can thermally impacted causing small clock changes.
 					// TODO: Next enhancement would be a low order polynominal fit the compensate for any thermal clock drift.
 					if (repeatarray)
 					{
@@ -353,4 +352,3 @@ cleanup:
 	if (payloadres) cb.cbFreePayloadResource(cb.mp4handle, payloadres);
 	return rate;
 }
-

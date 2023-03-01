@@ -28,7 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "GPMF_mp4reader.h"
+#include "gpmf-parser/GPMF_mp4reader.h"
 
 #define PRINT_MP4_STRUCTURE		0
 
@@ -221,7 +221,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 #endif
 	mp4->filesize = (uint64_t) mp4stat.st_size;
 //	printf("filesize = %ld\n", mp4->filesize);
-	if (mp4->filesize < 64) 
+	if (mp4->filesize < 64)
 	{
 		free(mp4);
 		return 0;
@@ -257,7 +257,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 					break;
 				}
 
-				if (!VALID_FOURCC(qttag) && (qttag & 0xff) != 0xa9) // ©xyz and ©swr are allowed
+				if (!VALID_FOURCC(qttag) && (qttag & 0xff) != 0xa9) // ï¿½xyz and ï¿½swr are allowed
 				{
 					CloseSource((size_t)mp4);
 					mp4 = NULL;
@@ -291,7 +291,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 				nestsize[nest] = qtsize;
 				lastsize = qtsize;
 
-#if PRINT_MP4_STRUCTURE	
+#if PRINT_MP4_STRUCTURE
 
 				for (int i = 1; i < nest; i++) printf("%5d ", nestsize[i]); //printf("    ");
 				printf(" %c%c%c%c (%lld)\n", (qttag & 0xff), ((qttag >> 8) & 0xff), ((qttag >> 16) & 0xff), ((qttag >> 24) & 0xff), qtsize);
@@ -333,7 +333,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 				}
 				else
 				{
-					
+
 					if (qttag == MAKEID('m', 'v', 'h', 'd')) //mvhd  movie header
 					{
 						len = fread(&skip, 1, 4, mp4->mediafp);
@@ -435,7 +435,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 										else if (i == 0) // If the first editlst starts after zero, the track is offset by this time (time before presentation time zero.)
 											mp4->trak_edit_list_offsets[mp4->trak_num] -= (int32_t)((double)segment_mediaTime/(double)mp4->trak_clockdemon*(double)mp4->clockdemon); //convert to MP4 clock base.
 									}
-									if (type == traktype) // GPMF metadata 
+									if (type == traktype) // GPMF metadata
 									{
 										mp4->metadataoffset_clockcount = mp4->trak_edit_list_offsets[mp4->trak_num]; //leave in MP4 clock base
 									}
@@ -457,7 +457,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 							len += fread(&subtype, 1, 4, mp4->mediafp);  // type will be 'meta' for the correct trak.
 							if (len == 16)
 							{
-								if (subtype != traksubtype) // not MP4 metadata 
+								if (subtype != traksubtype) // not MP4 metadata
 								{
 									type = 0; // MP4
 								}
@@ -855,7 +855,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 							LongSeek(mp4, qtsize - 8 - len); // skip over stco
 						}
 						else
-						if (type == traktype) // meta 
+						if (type == traktype) // meta
 						{
 							uint32_t totaldur = 0, samples = 0;
 							uint32_t entries = 0;
@@ -870,7 +870,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 								mp4->meta_clockcount = mp4->trak_clockcount;
 
 
-								if(mp4->meta_clockdemon == 0) 
+								if(mp4->meta_clockdemon == 0)
 								{
 									//prevent divide by zero
 									CloseSource((size_t)mp4);
@@ -923,7 +923,7 @@ size_t OpenMP4Source(char *filename, uint32_t traktype, uint32_t traksubtype, in
 				CloseSource((size_t)mp4);
 				mp4 = NULL;
 			}
-			
+
 			// set the numbers of payload with both size and offset
 			if (mp4 != NULL)
 			{
@@ -969,7 +969,7 @@ uint32_t GetVideoFrameRateAndCount(size_t handle, uint32_t *numer, uint32_t *dem
 void CloseSource(size_t handle)
 {
 	mp4object *mp4 = (mp4object *)handle;
-	if (mp4 == NULL) 
+	if (mp4 == NULL)
 	{
 		return;
 	}
@@ -994,7 +994,7 @@ void CloseSource(size_t handle)
 		free(mp4->metastsc);
 		mp4->metastsc = 0;
 	}
- 
+
  	free(mp4);
 }
 
@@ -1023,7 +1023,7 @@ uint32_t GetPayloadRationalTime(size_t handle, uint32_t index, int32_t *in_numer
 {
     mp4object *mp4 = (mp4object *)handle;
     if (mp4 == NULL) return MP4_ERROR_MEMORY;
-    
+
     if (mp4->metaoffsets == 0 || mp4->basemetadataduration == 0 || mp4->meta_clockdemon == 0 || in_numerator == NULL || out_numerator == NULL) return MP4_ERROR_MEMORY;
 
 	*in_numerator = (int32_t)(index * mp4->basemetadataduration);
@@ -1037,7 +1037,7 @@ uint32_t GetPayloadRationalTime(size_t handle, uint32_t index, int32_t *in_numer
 	*out_numerator += (int32_t)(((double)mp4->metadataoffset_clockcount / (double)mp4->clockdemon) * mp4->meta_clockdemon);
 
 	*denominator = mp4->meta_clockdemon;
-    
+
     return MP4_ERROR_OK;
 }
 
@@ -1084,7 +1084,7 @@ size_t OpenMP4SourceUDTA(char *filename, int32_t flags)
 	stat(filename, &mp4stat);
 #endif
 	mp4->filesize = (uint64_t)mp4stat.st_size;
-	if (mp4->filesize < 64) 
+	if (mp4->filesize < 64)
 	{
 		free(mp4);
 		return 0;
@@ -1183,4 +1183,3 @@ size_t OpenMP4SourceUDTA(char *filename, int32_t flags)
 	}
 	return (size_t)mp4;
 }
-

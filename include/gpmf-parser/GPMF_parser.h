@@ -1,13 +1,13 @@
 /*! @file GPMF_parser.h
- * 
+ *
  *  @brief GPMF Parser library include
- * 
+ *
  *  @version 2.0.0
- * 
+ *
  *  (C) Copyright 2017-2020 GoPro Inc (http://gopro.com/).
  *
  *  Licensed under either:
- *  - Apache License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0  
+ *  - Apache License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0
  *  - MIT license, http://opensource.org/licenses/MIT
  *  at your option.
  *
@@ -16,15 +16,15 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- * 
+ *
  */
 
 #ifndef _GPMF_PARSER_H
 #define _GPMF_PARSER_H
 
-#include <stdint.h>
-#include <stddef.h>
 #include "GPMF_common.h"
+#include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,18 +53,18 @@ typedef enum GPMF_LEVELS
 {
 	GPMF_CURRENT_LEVEL = 0,  // search or validate within the current GPMF next level
 	GPMF_RECURSE_LEVELS = 1, // search or validate recursing all levels
-	GPMF_TOLERANT = 2		 // Ignore minor errors like unknown datatypes if the structure is otherwise valid. 
+	GPMF_TOLERANT = 2		 // Ignore minor errors like unknown datatypes if the structure is otherwise valid.
 } GPMF_LEVELS;
 
- 
 
-// Prepare GPMF data 
+
+// Prepare GPMF data
 GPMF_ERR GPMF_Init(GPMF_stream *gs, uint32_t *buffer, uint32_t datasize);							//Initialize a GPMF_stream for parsing a particular buffer.
 GPMF_ERR GPMF_ResetState(GPMF_stream *gs);														//Read from beginning of the buffer again
-GPMF_ERR GPMF_CopyState(GPMF_stream *src, GPMF_stream *dst);									//Copy state, 
-GPMF_ERR GPMF_Validate(GPMF_stream *gs, GPMF_LEVELS recurse);									//Is the nest structure valid GPMF? 
+GPMF_ERR GPMF_CopyState(GPMF_stream *src, GPMF_stream *dst);									//Copy state,
+GPMF_ERR GPMF_Validate(GPMF_stream *gs, GPMF_LEVELS recurse);									//Is the nest structure valid GPMF?
 
-// Navigate through GPMF data 
+// Navigate through GPMF data
 GPMF_ERR GPMF_Next(GPMF_stream *gs, GPMF_LEVELS recurse);										//Step to the next GPMF KLV entrance, optionally recurse up or down nesting levels.
 GPMF_ERR GPMF_FindPrev(GPMF_stream *gs, uint32_t fourCC, GPMF_LEVELS recurse);					//find a previous FourCC -- at the current level only if recurse is false
 GPMF_ERR GPMF_FindNext(GPMF_stream *gs, uint32_t fourCC, GPMF_LEVELS recurse);					//find a particular FourCC upcoming -- at the current level only if recurse is false
@@ -77,7 +77,7 @@ uint32_t GPMF_StructSize(GPMF_stream *gs);														//return the current sam
 uint32_t GPMF_Repeat(GPMF_stream *gs);															//return the current repeat or the number of samples of this structure
 uint32_t GPMF_PayloadSampleCount(GPMF_stream *gs);														//return the current number of samples of this structure, supporting multisample entries.
 uint32_t GPMF_ElementsInStruct(GPMF_stream *gs);												//return the current number elements within the structure (e.g. 3-axis gyro)
-uint32_t GPMF_RawDataSize(GPMF_stream *gs);														//return the data size for the current GPMF KLV 
+uint32_t GPMF_RawDataSize(GPMF_stream *gs);														//return the data size for the current GPMF KLV
 void *   GPMF_RawData(GPMF_stream *gs);															//return a pointer the KLV data (which is Bigendian if the type is known.)
 
 
@@ -92,10 +92,10 @@ GPMF_ERR GPMF_DeviceName(GPMF_stream *gs, char *devicename_buf, uint32_t devicen
 // Utilities for data types
 uint32_t GPMF_SizeofType(GPMF_SampleType type);													// GPMF equivalent to sizeof(type)
 uint32_t GPMF_ExpandComplexTYPE(char *src, uint32_t srcsize, char *dst, uint32_t *dstsize);		// GPMF using TYPE for cmple structure.  { float val[16],uin32_t flags; } has type "f[8]L", this tools expands to the simpler format "ffffffffL"
-uint32_t GPMF_SizeOfComplexTYPE(char *typearray, uint32_t typestringlength);					// GPMF equivalent to sizeof(typedef) for complex types. 
+uint32_t GPMF_SizeOfComplexTYPE(char *typearray, uint32_t typestringlength);					// GPMF equivalent to sizeof(typedef) for complex types.
 GPMF_ERR GPMF_Reserved(uint32_t key);															// Test for a reverse GPMF Key, returns GPMF_OK is not reversed.
 
-//Tools for extracting sensor data 
+//Tools for extracting sensor data
 uint32_t GPMF_FormattedDataSize(GPMF_stream *gs);												//return the decompressed data size for the current GPMF KLV
 uint32_t GPMF_ScaledDataSize(GPMF_stream *gs, GPMF_SampleType type);												//return the decompressed data size for the current GPMF KLV
 GPMF_ERR GPMF_FormattedData(GPMF_stream *gs, void *buffer, uint32_t buffersize, uint32_t sample_offset, uint32_t read_samples);  // extract 'n' samples into local endian memory format.
@@ -107,7 +107,7 @@ typedef struct GPMF_codebook
 {
 	int16_t value;			//value to store
 	uint8_t offset;			//0 to 128+ bytes to skip before store (leading zeros)
-	uint8_t bits_used;		//1 to 16,32 (if escape code > 16 then read from bit-steam), 
+	uint8_t bits_used;		//1 to 16,32 (if escape code > 16 then read from bit-steam),
 	int8_t bytes_stored;	//bytes stored in value: 0, 1 or 2
 	int8_t command;		//0 - OKAY,  -1 valid code, 1 - end
 } GPMF_codebook;
@@ -117,7 +117,7 @@ GPMF_ERR GPMF_AllocCodebook(size_t *cbhandle);
 GPMF_ERR GPMF_FreeCodebook(size_t cbhandle);
 GPMF_ERR GPMF_DecompressedSize(GPMF_stream *gs, uint32_t *neededsize);
 GPMF_ERR GPMF_Decompress(GPMF_stream *gs, uint32_t *localbuf, uint32_t localbuf_size);
-GPMF_ERR GPMF_Free(GPMF_stream* gs); 
+GPMF_ERR GPMF_Free(GPMF_stream* gs);
 
 
 #ifdef __cplusplus
