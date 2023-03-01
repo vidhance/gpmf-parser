@@ -34,3 +34,7 @@
 
 # pkg-config files
 /*.pc
+
+# IDE/Editor configs and output
+.idea/
+cmake-build-*
